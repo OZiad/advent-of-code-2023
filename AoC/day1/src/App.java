@@ -29,6 +29,8 @@ public class App {
         }
     }
 
+    // Method that replaces all numbers written in word form to corresponding
+    // integers
     private static String replaceLetteredNumbers(String line) {
         String[] searchList = new String[] { "oneight", "twone", "eightwo", "one", "two", "three", "four", "five",
                 "six", "seven", "eight", "nine" };
@@ -36,6 +38,7 @@ public class App {
         return StringUtils.replaceEach(line, searchList, replacementList);
     }
 
+    // Calculates sum of first and last numbers in a given string
     public static Integer calibrationValue(String line) {
         line = replaceLetteredNumbers(line);
         int left = 0;
