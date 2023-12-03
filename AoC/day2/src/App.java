@@ -1,5 +1,4 @@
 // https://adventofcode.com/2023/day/2
-// 12 red cubes, 13 green cubes, and 14 blue cubes
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -17,7 +16,7 @@ public class App {
 
     public static void main(String[] args) throws Exception {
         String line;
-        String filePath = "E:/Repos/advent-of-code-2023/AoC/day2/day2/input.txt";
+        String filePath = "E:/Repos/advent-of-code-2023/AoC/day2/input.txt";
         final int GAME_ID_INDEX = 8;
         int sum = 0;
         int totalPowerSum = 0;
