@@ -10,11 +10,17 @@ import java.util.List;
 import java.util.Set;
 
 public class App {
+
+    // To be used to calculate power sets of minimum required number of cubes, each
+    // index holds max for a color [R, G , B]
+    private static int[] maxInGame = new int[3];
+
     public static void main(String[] args) throws Exception {
         String line;
         String filePath = "E:/Repos/advent-of-code-2023/AoC/day2/day2/input.txt";
         final int GAME_ID_INDEX = 8;
         int sum = 0;
+        int totalPowerSum = 0;
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             while ((line = br.readLine()) != null) {
                 int gameId = extractGameId(line);
@@ -24,6 +30,8 @@ public class App {
                     sum += gameId;
                     System.out.println("Valid Game, Total Sum: " + sum);
                 }
+                totalPowerSum += calculatePowerSet(maxInGame);
+                System.out.println("Current Minimum Power Set Sum: " + totalPowerSum);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -70,14 +78,28 @@ public class App {
                 }
             }
         }
-
+        updateMaximums(maxRed, maxGreen, maxBlue);
         return maxRed <= redCount && maxGreen <= greenCount && maxBlue <= blueCount;
+    }
+
+    private static void updateMaximums(int maxRed, int maxGreen, int maxBlue) {
+        maxInGame[0] = maxRed;
+        maxInGame[1] = maxGreen;
+        maxInGame[2] = maxBlue;
     }
 
     private static int extractGameId(String line) {
         // String[] parts = line.split(":");
         int colonIndex = line.indexOf(":");
         return Integer.parseInt(line.substring(5, colonIndex).trim());
+    }
+
+    private static int calculatePowerSet(int[] maxInGame) {
+        int powerSet = 1;
+        for (int num : maxInGame) {
+            powerSet *= num;
+        }
+        return powerSet;
     }
 }
 
