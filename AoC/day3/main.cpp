@@ -4,116 +4,145 @@
 #include <string>
 #include <unordered_set>
 
-using std::cout, std::string, std::vector, std::endl;
+using std::cout, std::string, std::vector, std::endl, std::unordered_set;
 
 struct RowAndCol
 {
-    int row;
-    int col;
-    RowAndCol(int x, int y) : row(x), col{y}
-    {
-    }
-    bool operator==(const RowAndCol &other) const { return row == other.row && col == other.col; };
+	int row;
+	int col;
+	RowAndCol(int x, int y) : row(x), col{ y }
+	{
+	}
+	bool operator==(const RowAndCol& other) const
+	{
+		return row == other.row && col == other.col;
+	};
 };
 
 // Define hash function for RowAndCol struct
 namespace std
 {
-    template <>
-    struct hash<RowAndCol>
-    {
-        size_t operator()(const RowAndCol &key) const
-        {
-            return hash<int>()(key.row) ^ hash<int>()(key.col);
-        }
-    };
+	template<>
+	struct hash<RowAndCol>
+	{
+		size_t operator()(const RowAndCol& key) const
+		{
+			return hash<int>()(key.row) ^ hash<int>()(key.col);
+		}
+	};
 }
 
-int sumOfPartNumbers(const vector<string> &engine_schematic)
+int sumOfPartNumbers(const vector<string>& engine_schematic, const std::unordered_set<RowAndCol>& valid_indices)
 {
-    int sum = 0;
-    int digit_start_index;
-    int digit_end_index;
-    for (int i = 0; i < engine_schematic.size(); i++)
-    {
-        for (int j = 0; j < engine_schematic[i].size(); j++)
-        {
-            bool is_valid_digit = false;
-            if (isdigit(engine_schematic[i][j]))
-            {
-            }
-        }
-    }
+	int sum = 0;
 
-    return sum;
+	for (int i = 0; i < engine_schematic.size(); i++)
+	{
+		int current_number = 0;
+		bool is_valid_digit = false;
+		for (int j = 0; j < engine_schematic[i].size(); j++)
+		{
+			char current_char = engine_schematic[i][j];
+			if (isdigit(current_char))
+			{
+				if (current_number == 0)
+				{
+					current_number += current_char - '0';
+				}
+				else
+				{
+					current_number = current_number * 10 + (current_char - '0');
+				}
+
+				if (valid_indices.find(RowAndCol(i, j)) != valid_indices.end())
+				{
+					is_valid_digit = true;
+				}
+			}
+
+				// Done with number that was being evaluated, add to sum and clean up for next digit
+			else
+			{
+				if (is_valid_digit)
+				{
+					sum += current_number;
+					is_valid_digit = false;
+				}
+				current_number = 0;
+
+			}
+			cout << "Current Number: " << current_number << endl;
+			cout << "Is Valid Digit: " << is_valid_digit << endl;
+			cout << "Current Sum: " << sum << endl;
+		}
+	}
+
+	return sum;
 }
 
-std::unordered_set<RowAndCol> storeAllSymbols(const vector<string> &engine_schematic)
+// Find symbols and store all indices that can contain a valid digit
+std::unordered_set<RowAndCol> store_valid_indices(const vector<string>& engine_schematic)
 {
-    std::unordered_set<RowAndCol> symbol_indices;
-    for (int i = 0; i < engine_schematic.size(); i++)
-    {
-        for (int j = 0; j < engine_schematic[i].size(); j++)
-        {
-            char character = engine_schematic[i][j];
-            if (character != '.' && !isdigit(character))
-            {
-                symbol_indices.emplace(i, j);
-            }
-        }
-    }
+	std::unordered_set<RowAndCol> valid_indices;
 
-    return symbol_indices;
+	// Define relative positions of adjacent indices
+	std::vector<std::pair<int, int>> adjacent_positions = {
+		{ -1, 0 }, { -1, 1 }, { -1, -1 },
+		{ 0, -1 }, { 0, 1 },
+		{ 1, 0 }, { 1, 1 }, { 1, -1 }
+	};
+
+	for (int i = 0; i < engine_schematic.size(); i++)
+	{
+		for (int j = 0; j < engine_schematic[i].size(); j++)
+		{
+			char character = engine_schematic[i][j];
+			if (character != '.' && !isdigit(character))
+			{
+				// Add all adjacent indices
+				for (const auto& position : adjacent_positions)
+				{
+					int newRow = i + position.first;
+					int newCol = j + position.second;
+
+					// Check if the new indices are within bounds
+					if (newRow >= 0 && newRow < engine_schematic.size() &&
+						newCol >= 0 && newCol < engine_schematic[i].size())
+					{
+						valid_indices.emplace(newRow, newCol);
+
+					}
+				}
+			}
+		}
+	}
+
+	return valid_indices;
 }
 
-// return true if the given index adjacent has a symbol (other than '.') adjacent to it
-bool isValidDigit(const vector<string> &engine_schematic, int row, int col)
-{
-    for (int x = -1; x <= 1; ++x)
-    {
-        for (int y = -1; y <= 1; ++y)
-        {
-            int newRow = row + x;
-            int newCol = col + y;
-
-            if (newRow >= 0 && newRow < engine_schematic.size() &&
-                newCol >= 0 && newCol < engine_schematic[row].size() &&
-                (x != 0 || y != 0) && isdigit(engine_schematic[newRow][newCol]))
-            {
-                // Accumulate the digits to form the multi-digit number
-            }
-        }
-    }
-    return false;
-}
 int main()
 {
-    std::ifstream inputFile("input.txt");
+	std::ifstream inputFile("input.txt");
 
-    if (!inputFile.is_open())
-    {
-        std::cerr << "Error opening file!" << endl;
-        return 1;
-    }
+	if (!inputFile.is_open())
+	{
+		std::cerr << "Error opening file!" << endl;
+		return 1;
+	}
 
-    vector<string> engine_schematic;
-    string line;
+	vector<string> engine_schematic;
+	string line;
 
-    // Read the engine schematic from the file
-    while (getline(inputFile, line))
-    {
-        engine_schematic.push_back(line);
-    }
-    inputFile.close();
+	// Read the engine schematic from the file
+	while (getline(inputFile, line))
+	{
+		engine_schematic.push_back(line);
+	}
+	inputFile.close();
 
-    int result = sumOfPartNumbers(engine_schematic);
-    cout << "The sum of all part numbers in the engine schematic is: " << result << endl;
+	unordered_set<RowAndCol> valid_indices = store_valid_indices(engine_schematic);
+	int result = sumOfPartNumbers(engine_schematic, valid_indices);
+	cout << "The sum of all part numbers in the engine schematic is: " << result << endl;
 
-    // auto test = storeAllSymbols(engine_schematic);
-    // for (auto &i : test)
-    // {
-    //     std::cout << "Row: " << i.row << " Col: " << i.col << endl;
-    // }
-
-    return 0;
+	return 0;
 }
