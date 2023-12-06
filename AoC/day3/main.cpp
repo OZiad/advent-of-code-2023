@@ -1,36 +1,46 @@
 #include <iostream>
-#include <string>
-#include <fstream>
-
-using std::cout, std::string;
-#include <iostream>
 #include <fstream>
 #include <vector>
 #include <string>
+#include <unordered_set>
 
-using namespace std;
+using std::cout, std::string, std::vector, std::endl;
+
+struct RowAndCol
+{
+    int row;
+    int col;
+    RowAndCol(int x, int y) : row(x), col{y}
+    {
+    }
+    bool operator==(const RowAndCol &other) const { return row == other.row && col == other.col; };
+};
+
+// Define hash function for RowAndCol struct
+namespace std
+{
+    template <>
+    struct hash<RowAndCol>
+    {
+        size_t operator()(const RowAndCol &key) const
+        {
+            return hash<int>()(key.row) ^ hash<int>()(key.col);
+        }
+    };
+}
 
 int sumOfPartNumbers(const vector<string> &engine_schematic)
 {
     int sum = 0;
     int digit_start_index;
     int digit_end_index;
-    bool is_part = false;
     for (int i = 0; i < engine_schematic.size(); i++)
     {
         for (int j = 0; j < engine_schematic[i].size(); j++)
         {
+            bool is_valid_digit = false;
             if (isdigit(engine_schematic[i][j]))
             {
-                digit_start_index, digit_end_index = j;
-                while (isdigit(engine_schematic[i][j]))
-                {
-                    /*
-                     * check if this number is valid
-                     */
-
-                    digit_end_index = ++j;
-                }
             }
         }
     }
@@ -38,13 +48,51 @@ int sumOfPartNumbers(const vector<string> &engine_schematic)
     return sum;
 }
 
+std::unordered_set<RowAndCol> storeAllSymbols(const vector<string> &engine_schematic)
+{
+    std::unordered_set<RowAndCol> symbol_indices;
+    for (int i = 0; i < engine_schematic.size(); i++)
+    {
+        for (int j = 0; j < engine_schematic[i].size(); j++)
+        {
+            char character = engine_schematic[i][j];
+            if (character != '.' && !isdigit(character))
+            {
+                symbol_indices.emplace(i, j);
+            }
+        }
+    }
+
+    return symbol_indices;
+}
+
+// return true if the given index adjacent has a symbol (other than '.') adjacent to it
+bool isValidDigit(const vector<string> &engine_schematic, int row, int col)
+{
+    for (int x = -1; x <= 1; ++x)
+    {
+        for (int y = -1; y <= 1; ++y)
+        {
+            int newRow = row + x;
+            int newCol = col + y;
+
+            if (newRow >= 0 && newRow < engine_schematic.size() &&
+                newCol >= 0 && newCol < engine_schematic[row].size() &&
+                (x != 0 || y != 0) && isdigit(engine_schematic[newRow][newCol]))
+            {
+                // Accumulate the digits to form the multi-digit number
+            }
+        }
+    }
+    return false;
+}
 int main()
 {
-    ifstream inputFile("input.txt");
+    std::ifstream inputFile("input.txt");
 
     if (!inputFile.is_open())
     {
-        cerr << "Error opening file!" << endl;
+        std::cerr << "Error opening file!" << endl;
         return 1;
     }
 
@@ -59,28 +107,13 @@ int main()
     inputFile.close();
 
     int result = sumOfPartNumbers(engine_schematic);
-
-    // Output the result
     cout << "The sum of all part numbers in the engine schematic is: " << result << endl;
+
+    // auto test = storeAllSymbols(engine_schematic);
+    // for (auto &i : test)
+    // {
+    //     std::cout << "Row: " << i.row << " Col: " << i.col << endl;
+    // }
 
     return 0;
 }
-
-// int main()
-// {
-//     string input_file_path = "input.txt";
-//     string line;
-//     std::ifstream input_file(input_file_path);
-//     if (input_file.is_open())
-//     {
-//         while (getline(input_file, line))
-//         {
-//             cout << line << '\n';
-//         }
-//         input_file.close();
-//     }
-
-//     else
-//         cout << "Unable to open file";
-//     return 0;
-// }
