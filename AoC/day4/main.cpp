@@ -4,6 +4,7 @@
 #include <string>
 #include <unordered_set>
 #include <sstream>
+#include <cmath>
 
 using std::cout, std::string, std::vector, std::endl, std::unordered_set, std::stringstream;
 
@@ -28,10 +29,17 @@ unordered_set<int> extract_nums(string str)
     return nums;
 }
 
-int calculate_score()
+int calculate_score(const unordered_set<int> &winning_nums, const unordered_set<int> &nums)
 {
-    int score;
-
+    int score = 0;
+    int count = 0;
+    for (auto num : nums)
+    {
+        if (winning_nums.find(num) != winning_nums.end())
+        {
+            score = std::pow(2, count++);
+        }
+    }
     return score;
 }
 
@@ -43,6 +51,7 @@ unordered_set<int> find_nums(const string &line, int start_index, int end_index)
 
     return winning_nums;
 }
+
 int main()
 {
 
@@ -65,13 +74,16 @@ int main()
 
         size_t colon_pos = line.find(':');
         size_t bar_pos = line.find('|');
+
         winning_nums = find_nums(line, colon_pos + 1, bar_pos - colon_pos - 1);
         nums = find_nums(line, bar_pos + 1, line.length() - bar_pos - 1);
-        score += calculate_score();
+        score += calculate_score(winning_nums, nums);
+
+        cout << score << endl;
         nums.clear();
         winning_nums.clear();
     }
-
+    cout << score;
     inputFile.close();
     return 0;
 }
